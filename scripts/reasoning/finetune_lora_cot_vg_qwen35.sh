@@ -10,7 +10,7 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --mem=128G
-#SBATCH --time=24:00:00                  # CoT seqs are ~2x SFT; 2 epochs
+#SBATCH --time=24:00:00                  # CoT seqs are ~2x SFT
 #SBATCH --output=/arf/scratch/aalatan/Re-CoT/Qwen-VL-Series-Finetune/output/qwen35-cot-vg-%j.out
 #SBATCH --error=/arf/scratch/aalatan/Re-CoT/Qwen-VL-Series-Finetune/output/qwen35-cot-vg-%j.err
 
@@ -57,7 +57,7 @@ fi
 #       the task; 2e-4 risks trampling the SFT skill while learning the CoT format.
 #   vision_lr 2e-5           - keep the already-good visual features nearly fixed while
 #       the LLM learns to reason (vision LoRA stays on for spatial grounding).
-#   num_train_epochs 2       - reasoning quality benefits from a second pass.
+#   num_train_epochs 1       - single pass over the reasoning data.
 # Targets are ~400 tokens (vs ~5 in SFT); truncation is disabled in the dataset, so
 # nothing is silently cut. If this OOMs, set --gradient_checkpointing True first.
 "$ENV/bin/torchrun" --standalone --nproc_per_node=$NUM_DEVICES src/train/train_sft.py \
@@ -81,7 +81,7 @@ fi
     --fp16 False \
     --disable_flash_attn2 True \
     --output_dir "$OUTPUT_DIR" \
-    --num_train_epochs 2 \
+    --num_train_epochs 1 \
     --per_device_train_batch_size $BATCH_PER_DEVICE \
     --gradient_accumulation_steps $GRAD_ACCUM_STEPS \
     --image_min_pixels $((256 * 28 * 28)) \
